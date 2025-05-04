@@ -1,0 +1,123 @@
+/* General page styling */
+body {
+    font-family: Georgia, serif;
+    background-color: #65f7df;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Header styles */
+  header {
+    background-color: #044105;
+    color: white;
+    padding: 15px;
+    text-align: left;
+  }
+  
+  header h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  nav {
+    text-align: right;
+    margin-top: -25px;
+  }
+  
+  nav a {
+    color: #f9dcdc;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 14px;
+  }
+  
+  main {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  h2 {
+    font-size: 22px;
+    color: #000;
+    margin-bottom: 20px;
+  }
+  
+  /* Button styles */
+  .button-container {
+    margin-bottom: 20px;
+  }
+  
+  .activity-button {
+    background-color: #f44250;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #144554;
+    border-radius: 5px;
+  }
+  
+  .activity-button:hover {
+    background-color: #d63b48;
+  }
+  
+  /* Quote box */
+  .quote-box {
+    background-color: white;
+    border: 2px solid #444;
+    width: 60%;
+    margin: 0 auto 20px;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  /* Audio navigation box */
+  .audio-nav-box {
+    background-color: #044105;
+    color: white;
+    padding: 20px;
+    width: 70%;
+    margin: 0 auto;
+    border-radius: 5px;
+  }
+  
+  .audio-nav-box h3 {
+    font-size: 20px;
+  }
+  
+  .audio-nav-box ul {
+    text-align: left;
+    list-style: none;
+    padding-left: 0;
+    font-size: 14px;
+  }
+  
+  .audio-nav-box li {
+    margin-bottom: 10px;
+  }
+  
+  .audio-nav-box code {
+    background-color: #d63b48;
+    color: #000;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  
+  .audio-nav-box button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .audio-nav-box button:hover {
+    background-color: #d63b48;
+  }
+  
