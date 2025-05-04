@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Doggos!</title>
+  <style>
+    body { background-color: #65f7df; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    h1 { color: #000; text-align: center; }
+    .nav { background-color: #044105; padding: 10px; text-align: center; }
+    .nav a { color: white; margin: 0 10px; text-decoration: none; }
+    #carousel { text-align: center; margin: 20px 0; }
+    #carousel img { max-height: 400px; object-fit: cover; width: 100%; max-width: 600px; border-radius: 10px; }
+    .carousel-btn { background-color: #044105; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; }
+    .breed-buttons { text-align: center; margin: 20px; }
+    .breed-buttons button {
+      background-color: #044105;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .breed-info { 
+      display: none; 
+      background-color: #044105; 
+      color: white; 
+      padding: 20px; 
+      margin: 20px auto; 
+      width: 80%; 
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      max-width: 500px;
+    }
+    .commands-guide {
+      background-color: #044105;
+      color: white;
+      padding: 20px;
+      margin: 20px auto;
+      width: 80%;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      max-width: 500px;
+      text-align: left;
+    }
+    .commands-guide table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .commands-guide td {
+      padding: 8px;
+      vertical-align: top;
+    }
+  </style>
+</head>
+<body>
+  <h1>Doggos! 🐶</h1>
+  <div class="nav">
+    <a href="home.html">Home</a>
+    <a href="stocks.html">Stocks</a>
+    <a href="dogs.html">Dogs</a>
+  </div>
+
+  <div id="carousel">
+    <button class="carousel-btn" onclick="prevImage()">⬅️</button>
+    <img id="dogImage" src="" alt="Dog Image">
+    <button class="carousel-btn" onclick="nextImage()">➡️</button>
+  </div>
+
+  <div class="breed-buttons" id="breedButtons"></div>
+  <div class="breed-info" id="breedInfo"></div>
+
+  <div class="commands-guide">
+    <h3>Voice Commands Guide 🎙️</h3>
+    <table>
+      <tr>
+        <td><strong>Load Dog Breed</strong></td>
+        <td>Say "Load Dog Breed &lt;breed name&gt;"</td>
+      </tr>
+      <tr>
+        <td><strong>Navigate to Page</strong></td>
+        <td>Say "Navigate to &lt;page&gt;"</td>
+      </tr>
+      <tr>
+        <td><strong>Change the Color</strong></td>
+        <td>Say "Change the color to &lt;color&gt;"</td>
+      </tr>
+      <tr>
+        <td><strong>Hello</strong></td>
+        <td>Say "Hello"</td>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    const carouselImages = [];
+    let currentIndex = 0;
+
+    async function loadRandomDogs() {
+      for (let i = 0; i < 10; i++) {
+        const res = await fetch('https://dog.ceo/api/breeds/image/random');
+        const data = await res.json();
+        carouselImages.push(data.message);
+      }
+      document.getElementById('dogImage').src = carouselImages[currentIndex];
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex + 1) % carouselImages.length;
+      document.getElementById('dogImage').src = carouselImages[currentIndex];
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 1 + carouselImages.length) % carouselImages.length;
+      document.getElementById('dogImage').src = carouselImages[currentIndex];
+    }
+
+    const breedButtons = document.getElementById('breedButtons');
+    const breedInfo = document.getElementById('breedInfo');
+    let currentBreeds = [];
+
+    async function loadBreeds() {
+      const response = await fetch('https://api.thedogapi.com/v1/breeds');
+      const breeds = await response.json();
+
+      currentBreeds = breeds.sort(() => 0.15 - Math.random()).slice(0, 15);
+
+      breedButtons.innerHTML = ''; 
+      currentBreeds.forEach(breed => {
+        const button = document.createElement('button');
+        button.textContent = breed.name;
+        button.classList.add('breed-btn');
+        button.addEventListener('click', () => showBreedInfo(breed));
+        breedButtons.appendChild(button);
+      });
+    }
+
+    function showBreedInfo(breed) {
+      breedInfo.innerHTML = `
+        <h2>${breed.name}</h2>
+        <p><strong>Description:</strong> ${breed.temperament || 'N/A'}</p>
+        <p><strong>Min Life Expectancy:</strong> ${breed.life_span.split(' ')[0]}</p>
+        <p><strong>Max Life Expectancy:</strong> ${breed.life_span.split(' ').pop()}</p>
+      `;
+      breedInfo.style.display = 'block';
+    }
+
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+      const command = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+      console.log("Voice Command:", command);
+
+      if (command === "hello") {
+        alert("Hello!");
+      }
+
+      if (command.startsWith("navigate to")) {
+        const page = command.replace("navigate to", "").trim();
+        if (page === "home") window.location.href = "home.html";
+        if (page === "stocks") window.location.href = "stocks.html";
+        if (page === "dogs") window.location.href = "dogs.html";
+      }
+
+      if (command.startsWith("change the color to")) {
+        const color = command.replace("change the color to", "").trim();
+        document.body.style.backgroundColor = color;
+      }
+
+      if (command.startsWith("load dog breed")) {
+        const breedName = command.replace("load dog breed", "").trim();
+        const matched = currentBreeds.find(b => b.name.toLowerCase() === breedName);
+        if (matched) {
+          showBreedInfo(matched);
+        } else {
+          alert("Breed not found in current list. Try refreshing.");
+        }
+      }
+    };
+    recognition.start();
+    loadRandomDogs();
+    loadBreeds();
+  </script>
+</body>
+</html>
