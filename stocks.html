@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stocks Page</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #65f7df; font-family: Arial, sans-serif; }
+    .nav { background-color: #044105; padding: 10px; }
+    .nav a { color: rgb(255, 255, 255); margin: 0 10px; text-decoration: none; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 10px; }
+    .bullish { width: 50px; }
+    .bearish { width: 50px; }
+    .custom-btn { background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>INST377 - Activities</h1>
+  <div class="nav">
+    <a href="home.html">Home</a> .
+    <a href="stocks.html">Stocks</a> .
+    <a href="dogs.html">Dogs</a>
+  </div>
+
+  <h2>Let's chart some stocks!</h2>
+   <input type="text" id="stockInput" placeholder="Enter Stock Ticker">
+   <select id="daysSelect">
+     <option value="30">30 Days</option>
+     <option value="60">60 Days</option>
+     <option value="90">90 Days</option>
+   </select>
+   <button onclick="lookupStock()">Lookup</button>
+ 
+   <canvas id="stockChart" width="600" height="400"></canvas>
+ 
+   <h2>Top 5 Stocks on Reddit</h2>
+   <table id="topStocksTable"></table>
+ 
+   <p id="voiceStatus">Voice Command: Ready. Say "Lookup MSFT" or "Navigate to Dogs"</p>
+ 
+   <script>
+     document.addEventListener('DOMContentLoaded', () => {
+       loadTopStocks();
+       startVoiceRecognition();
+     });
+ 
+     async function loadTopStocks() {
+       try {
+         const response = await fetch('https://tradestie.com/api/v1/apps/reddit?date=2022-04-03');
+         const data = await response.json();
+ 
+         const top5 = data.slice(0, 5);
+         const table = document.getElementById('topStocksTable');
+          table.innerHTML = '';
+ 
+         const headerRow = document.createElement('tr');
+         headerRow.innerHTML = `
+           <th>TICKER</th>
+           <th>COMMENT COUNT</th>
+           <th>SENTIMENT</th>
+         `;
+         table.appendChild(headerRow);
+ 
+         top5.forEach(stock => {
+           let sentimentIcon = '';
+           if (stock.sentiment === 'Bullish') {
+             sentimentIcon = 'bullish_icon.jpg';
+           } else if (stock.sentiment === 'Bearish') {
+             sentimentIcon = 'bearish_icon.jpg';
+           }
+ 
+           const row = document.createElement('tr');
+           row.innerHTML = `
+             <td><a href="https://finance.yahoo.com/quote/${stock.ticker}" target="_blank">${stock.ticker}</a></td>
+             <td>${stock.no_of_comments}</td>
+             <td><img src="${sentimentIcon}" width="100"></td>
+           `;
+           table.appendChild(row);
+         });
+ 
+       } catch (error) {
+         console.error('Error fetching top stocks:', error);
+       }
+     }
+ 
+     async function lookupStock() {
+       const ticker = document.getElementById('stockInput').value.toUpperCase();
+       const days = document.getElementById('daysSelect').value;
+       const apiKey = 'swcMtOCPbBobKu5Lq_6qf7JgU59JbuNK';
+       const today = new Date();
+       const pastDate = new Date();
+       pastDate.setDate(today.getDate() - days);
+ 
+       const to = today.toISOString().split('T')[0];
+       const from = pastDate.toISOString().split('T')[0];
+ 
+       const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${from}/${to}?adjusted=true&sort=asc&limit=120&apiKey=${apiKey}`;
+ 
+       try {
+         const response = await fetch(url);
+         const data = await response.json();
+ 
+         const labels = data.results.map(item => {
+           const date = new Date(item.t);
+           return date.toLocaleDateString();
+         });
+ 
+         const prices = data.results.map(item => item.c);
+ 
+         showChart(labels, prices, ticker);
+ 
+       } catch (error) {
+         console.error('Error fetching stock data:', error);
+       }
+     }
+ 
+     let chart;
+     function showChart(labels, data, ticker) {
+       const ctx = document.getElementById('stockChart').getContext('2d');
+ 
+       if (chart) {
+         chart.destroy();
+       }
+ 
+       chart = new Chart(ctx, {
+         type: 'line',
+         data: {
+           labels: labels,
+           datasets: [{
+             label: `${ticker} Closing Prices`,
+             data: data,
+             borderColor: 'blue',
+             fill: false
+           }]
+         },
+         options: {
+           responsive: false,
+           scales: {
+             x: {
+               display: true,
+               title: {
+                 display: true,
+                 text: 'Date'
+               }
+             },
+             y: {
+               display: true,
+               title: {
+                 display: true,
+                 text: 'Price (USD)'
+               }
+             }
+           }
+         }
+       });
+     }
+ 
+     function startVoiceRecognition() {
+       if (!('webkitSpeechRecognition' in window)) {
+         alert('Your browser does not support Speech Recognition.');
+         return;
+       }
+ 
+       const recognition = new webkitSpeechRecognition();
+       recognition.continuous = true;
+       recognition.interimResults = false;
+       recognition.lang = 'en-US';
+       recognition.start();
+ 
+       recognition.onresult = function(event) {
+         for (let i = event.resultIndex; i < event.results.length; ++i) {
+           if (event.results[i].isFinal) {
+             const transcript = event.results[i][0].transcript.trim().toLowerCase();
+             console.log('Voice heard:', transcript);
+             handleVoiceCommand(transcript);
+           }
+         }
+       };
+ 
+       recognition.onerror = function(event) {
+         console.error('Speech recognition error', event);
+       };
+ 
+       document.getElementById('voiceStatus').innerText = "Voice Command: Listening...";
+     }
+ 
+     function handleVoiceCommand(command) {
+       document.getElementById('voiceStatus').innerText = "Heard: " + command;
+ 
+       if (command.startsWith("lookup ")) {
+         const ticker = command.split(" ")[1].toUpperCase();
+         document.getElementById('stockInput').value = ticker;
+         lookupStock();
+       }
+ 
+       if (command.includes("navigate to dogs")) {
+         window.location.href = "dogs.html";
+       } else if (command.includes("navigate to home")) {
+         window.location.href = "home.html";
+       }
+     }
+   </script>
+ </body>
+ </html>
