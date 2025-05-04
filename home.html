@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+  <title>INST377 - Activities</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>INST377 - Activities</h1>
+    <nav>
+      <a href="home.html">Home</a> ·
+      <a href="stocks.html">Stocks</a> ·
+      <a href="dogs.html">Dogs</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>These are some different activities we can try!</h2>
+
+    <div class="button-container">
+      <button class="activity-button" onclick="location.href='stocks.html'">Stocks</button>
+      <button class="activity-button" onclick="location.href='dogs.html'">Dogs</button>
+    </div>
+
+    <div class="quote-box">
+      <h3>Quote of the Page Load</h3>
+      <p><em>“Silence is sometimes the best answer.”</em> — Dalai Lama</p>
+    </div>
+
+    <div class="audio-nav-box">
+      <h3>In this web page there are options to Navigate using Audio!</h3>
+      <p>Ensure your Mic is enabled to be able to use this feature</p>
+      <ul style="list-style: none; padding: 0;">
+        <li><strong>Navigate to a Different Page</strong><br>
+            ◦ Say: <span class="command-text">Navigate to &lt;page&gt;</span></li>
+        <li><strong>Change the Page Color</strong><br>
+            ◦ Say: <span class="command-text">Change the color to &lt;color&gt;</span></li>
+        <li><strong>Say Hello Back to you!</strong><br>
+            ◦ Say: <span class="command-text">Hello</span></li>
+      </ul>      
+      <button onclick="startListening()">Turn On Listening</button>
+      <button onclick="stopListening()">Turn Off Listening</button>
+    </div>
+  </main>
+  <script>
+    if (annyang) {
+      const commands = {
+        'navigate to *page': function(page) {
+          page = page.toLowerCase();
+          if (page === 'stocks') {
+            window.location.href = 'stocks.html';
+          } else if (page === 'dogs') {
+            window.location.href = 'dogs.html';
+          } else if (page === 'home') {
+            window.location.href = 'index.html';
+          } else {
+            alert('Unknown page: ' + page);
+          }
+        },
+
+        'change the color to *color': function(color) {
+          document.body.style.backgroundColor = color;
+        },
+
+        'hello': function() {
+          alert('Hello back to you!');
+        }
+      };
+     
+    annyang.addCommands(commands);
+
+      function startListening() {
+        annyang.start({ autoRestart: true, continuous: true });
+        console.log('Listening...');
+      }
+
+      function stopListening() {
+        annyang.abort();
+        console.log('Stopped listening.');
+      }
+
+      window.startListening = startListening;
+      window.stopListening = stopListening;
+    } else {
+      alert('Speech Recognition is not supported in this browser.');
+    }
+  </script>
+</body>
+</html>
